@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mustaqbal GPT - جامعة المستقبل</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Tajawal',system-ui,sans-serif;background:#0A2647;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:16px}
+
+/* ─── LOGIN CARD ─── */
+.card{background:white;border-radius:20px;padding:32px;width:100%;max-width:420px;box-shadow:0 24px 60px rgba(0,0,0,.4)}
+.logo-row{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.logo-row img{width:52px;height:52px;border-radius:12px;object-fit:contain;border:2px solid #f0f4f8}
+.logo-row h1{font-size:20px;font-weight:900;color:#0A2647;line-height:1.2}
+.logo-row span{font-size:11px;color:#C9A227;display:block;font-weight:600}
+.sub{font-size:13px;color:#64748b;margin-bottom:20px}
+
+/* Role tabs */
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:#f1f5f9;border-radius:12px;padding:4px;margin-bottom:16px}
+.tab{border:none;background:none;padding:10px 4px;border-radius:9px;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:700;color:#64748b;cursor:pointer;transition:.2s;display:flex;flex-direction:column;align-items:center;gap:2px}
+.tab.active{background:#0A2647;color:white;box-shadow:0 2px 8px rgba(10,38,71,.3)}
+.tab em{font-size:20px;font-style:normal}
+
+/* Quick login */
+.ql-title{font-size:11px;color:#94a3b8;text-align:center;margin-bottom:8px}
+.ql-row{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:16px}
+.ql{border:1.5px solid #e2e8f0;background:#f8fafc;border-radius:9px;padding:8px 4px;font-family:'Tajawal',sans-serif;font-size:12px;font-weight:700;color:#374151;cursor:pointer;text-align:center;transition:.2s}
+.ql:hover{border-color:#C9A227;background:#fefce8;color:#0A2647}
+
+/* Fields */
+.field{margin-bottom:13px}
+.field label{display:block;font-size:12px;font-weight:700;color:#374151;margin-bottom:5px}
+.field input,.field select{width:100%;padding:11px 14px;border:2px solid #e2e8f0;border-radius:11px;font-family:'Tajawal',sans-serif;font-size:13px;outline:none;background:white;color:#0A2647;transition:.2s}
+.field input:focus,.field select:focus{border-color:#C9A227}
+
+.btn-login{width:100%;padding:13px;background:#0A2647;color:white;border:none;border-radius:13px;font-family:'Tajawal',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:4px;display:flex;align-items:center;justify-content:center;gap:8px;transition:.2s}
+.btn-login:hover{background:#144272}
+.spin{width:18px;height:18px;border:2px solid rgba(255,255,255,.35);border-top-color:white;border-radius:50%;animation:sp .6s linear infinite;display:none}
+@keyframes sp{to{transform:rotate(360deg)}}
+.note{text-align:center;font-size:11px;color:#94a3b8;margin-top:10px}
+
+/* ─── APP SHELL ─── */
+#app{display:none;height:100vh;width:100vw;position:fixed;top:0;right:0;background:#f0f4f8;direction:rtl}
+#app.show{display:flex}
+
+/* Sidebar */
+.sb{width:250px;background:#0A2647;display:flex;flex-direction:column;height:100%;flex-shrink:0}
+.sb-top{padding:14px;border-bottom:1px solid rgba(255,255,255,.1)}
+.sb-logo{display:flex;align-items:center;gap:9px}
+.sb-logo img{width:38px;height:38px;border-radius:9px;background:white;padding:2px;object-fit:contain;flex-shrink:0}
+.sb-logo-text h3{font-size:13px;font-weight:700;color:white;line-height:1.2}
+.sb-logo-text small{font-size:9px;color:#E8C547}
+.badge{display:inline-flex;align-items:center;gap:5px;margin-top:8px;background:rgba(201,162,39,.15);border:1px solid rgba(201,162,39,.4);border-radius:20px;padding:2px 9px}
+.badge .dot{width:5px;height:5px;background:#22c55e;border-radius:50%;animation:pulse 1.5s infinite}
+.badge span{font-size:10px;color:#E8C547;font-weight:600}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+.new-chat{margin:10px;padding:10px;background:#C9A227;color:#0A2647;border:none;border-radius:10px;font-family:'Tajawal',sans-serif;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:.2s}
+.new-chat:hover{background:#E8C547}
+
+.sb-nav{flex:1;padding:6px;overflow-y:auto}
+.nav-btn{display:flex;align-items:center;gap:9px;padding:10px 11px;border-radius:9px;cursor:pointer;color:rgba(255,255,255,.65);font-size:13px;font-weight:500;border:none;background:none;width:100%;text-align:right;font-family:'Tajawal',sans-serif;margin-bottom:2px;transition:.15s}
+.nav-btn:hover{background:rgba(255,255,255,.08);color:rgba(255,255,255,.9)}
+.nav-btn.active{background:rgba(255,255,255,.13);color:white;border:1px solid rgba(255,255,255,.18)}
+.nav-btn em{font-size:16px;font-style:normal;flex-shrink:0}
+
+.recent-title{font-size:10px;color:rgba(255,255,255,.3);font-weight:600;padding:10px 12px 4px}
+.recent-item{padding:7px 12px;border-radius:8px;cursor:pointer;color:rgba(255,255,255,.45);font-size:12px;transition:.15s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.recent-item:hover{color:rgba(255,255,255,.8);background:rgba(255,255,255,.06)}
+
+.sb-footer{padding:12px;border-top:1px solid rgba(255,255,255,.1)}
+.user-row{display:flex;align-items:center;gap:8px}
+.user-av{width:34px;height:34px;background:#C9A227;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.user-info{flex:1;min-width:0}
+.user-name{font-size:12px;font-weight:700;color:white;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.user-col{font-size:10px;color:rgba(255,255,255,.45);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.logout{background:none;border:none;cursor:pointer;color:rgba(255,255,255,.35);font-size:16px;padding:5px;border-radius:7px;transition:.2s;font-family:inherit}
+.logout:hover{color:white;background:rgba(255,255,255,.1)}
+
+/* Main area */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{background:white;border-bottom:1px solid #e2e8f0;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.tb-search{padding:8px 12px;background:#f1f5f9;border:none;border-radius:10px;font-family:'Tajawal',sans-serif;font-size:13px;width:200px;outline:none;direction:rtl}
+.tb-bell{background:none;border:none;font-size:18px;cursor:pointer;padding:6px;position:relative}
+.tb-bell::after{content:'';position:absolute;top:4px;right:4px;width:7px;height:7px;background:#C9A227;border-radius:50%}
+
+/* Pages */
+.page{flex:1;overflow-y:auto;display:none;flex-direction:column}
+.page.active{display:flex}
+
+/* ─── CHAT ─── */
+.chat-top{background:white;border-bottom:1px solid #e2e8f0;padding:12px 20px;display:flex;align-items:center;gap:11px;flex-shrink:0}
+.ai-av{width:38px;height:38px;background:#0A2647;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.chat-name{font-size:14px;font-weight:700;color:#0A2647}
+.chat-status{display:flex;align-items:center;gap:5px;font-size:11px;color:#64748b;margin-top:2px}
+.online-dot{width:6px;height:6px;background:#22c55e;border-radius:50%;animation:pulse 2s infinite}
+
+.messages{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:14px}
+.msg{display:flex;gap:9px}
+.msg-av{width:32px;height:32px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px}
+.msg.ai .msg-av{background:#0A2647}
+.msg.user .msg-av{background:#C9A227}
+.msg-bub{padding:11px 15px;border-radius:13px;font-size:13px;line-height:1.65;max-width:600px}
+.msg.ai .msg-bub{background:white;color:#1e293b;border:1px solid #e2e8f0;border-top-left-radius:3px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.msg.user .msg-bub{background:#0A2647;color:white;border-top-right-radius:3px}
+.msg-time{font-size:10px;color:#94a3b8;margin-top:4px}
+
+.typing{display:flex;gap:5px;align-items:center;padding:11px 15px;background:white;border:1px solid #e2e8f0;border-radius:13px;border-top-left-radius:3px;width:fit-content}
+.typing span{width:7px;height:7px;background:#C9A227;border-radius:50%;animation:bounce 1.2s infinite}
+.typing span:nth-child(2){animation-delay:.18s}
+.typing span:nth-child(3){animation-delay:.36s}
+@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
+
+.quick-acts{padding:10px 20px;display:flex;flex-wrap:wrap;gap:7px;justify-content:flex-end;flex-shrink:0}
+.qa{padding:7px 13px;background:white;border:1px solid #e2e8f0;border-radius:20px;font-family:'Tajawal',sans-serif;font-size:12px;color:#475569;cursor:pointer;transition:.2s}
+.qa:hover{border-color:#C9A227;transform:translateY(-1px)}
+
+.input-wrap{background:white;border-top:1px solid #e2e8f0;padding:12px 20px;flex-shrink:0}
+.input-box{display:flex;align-items:flex-end;gap:7px;background:#f7f9fc;border-radius:15px;padding:7px;border:2px solid transparent;transition:.2s}
+.input-box:focus-within{border-color:#C9A227;background:white}
+.icon-btn{background:none;border:none;cursor:pointer;padding:7px;font-size:17px;color:#94a3b8;border-radius:8px}
+.icon-btn:hover{background:#f1f5f9}
+textarea#msgInput{flex:1;background:none;border:none;font-family:'Tajawal',sans-serif;font-size:13px;direction:rtl;resize:none;max-height:110px;outline:none;padding:4px 7px;line-height:1.5;min-height:34px}
+.send-btn{background:#C9A227;border:none;border-radius:10px;padding:8px 12px;cursor:pointer;font-size:17px;transition:.2s;flex-shrink:0}
+.send-btn:hover{background:#E8C547}
+.send-btn:disabled{opacity:.35;cursor:not-allowed}
+.hint{text-align:center;font-size:10px;color:#94a3b8;margin-top:5px}
+
+/* ─── DASHBOARD ─── */
+.dash-wrap{padding:22px;flex:1;overflow-y:auto}
+.welcome-box{background:#0A2647;border-radius:18px;padding:22px;color:white;margin-bottom:18px;position:relative;overflow:hidden}
+.welcome-box::before{content:'';position:absolute;top:-50px;left:-50px;width:200px;height:200px;background:#C9A227;opacity:.07;border-radius:50%;pointer-events:none}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:18px}
+.stat{background:white;border-radius:13px;padding:15px;border:1px solid #e2e8f0}
+.stat-val{font-size:26px;font-weight:900;color:#0A2647}
+.stat-lbl{font-size:12px;color:#64748b;margin-top:2px}
+.two-col{display:grid;grid-template-columns:3fr 2fr;gap:14px}
+.panel{background:white;border-radius:15px;padding:18px;border:1px solid #e2e8f0}
+.panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.panel-title{font-size:14px;font-weight:700;color:#0A2647}
+.prog-item{margin-bottom:13px}
+.prog-row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px}
+.prog-bar{height:6px;background:#f1f5f9;border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;border-radius:3px}
+.act-item{display:flex;align-items:start;gap:9px;padding:9px;border-radius:10px;cursor:pointer;transition:.15s;margin-bottom:3px}
+.act-item:hover{background:#f8fafc}
+.act-ico{width:33px;height:33px;background:rgba(201,162,39,.1);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+
+/* ─── ADMIN ─── */
+.admin-wrap{padding:22px;flex:1;overflow-y:auto}
+.admin-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px}
+.export-btn{display:flex;align-items:center;gap:7px;padding:10px 18px;background:#15803d;color:white;border:none;border-radius:11px;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:.2s}
+.export-btn:hover{background:#166534;transform:translateY(-1px)}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:18px}
+.kpi{background:white;border-radius:13px;padding:15px;border:1px solid #e2e8f0}
+.kpi-ico{font-size:24px;margin-bottom:6px}
+.kpi-val{font-size:25px;font-weight:900;color:#0A2647}
+.kpi-lbl{font-size:11px;color:#64748b;margin-top:3px}
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.bar-chart{display:flex;align-items:flex-end;gap:5px;height:100px}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.bar{border-radius:4px 4px 0 0;width:100%;background:#0A2647;transition:.3s}
+.bar:hover{background:#C9A227}
+.bar-lbl{font-size:9px;color:#94a3b8;text-align:center}
+.col-item{margin-bottom:11px}
+.col-row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px}
+.col-name{font-weight:600;color:#0A2647}
+.col-pct{font-weight:700;color:#C9A227}
+.last-row{display:grid;grid-template-columns:2fr 1fr;gap:14px}
+.sys-panel{background:#0A2647;border-radius:15px;padding:18px;color:white}
+.sys-row{display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,.07);border-radius:9px;padding:9px 12px;margin-bottom:7px}
+.sys-lbl{font-size:12px;color:rgba(255,255,255,.65)}
+.sys-val{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700}
+.sys-dot{width:6px;height:6px;border-radius:50%;animation:pulse 2s infinite}
+.tbl{width:100%;border-collapse:collapse;font-size:12px;text-align:right}
+.tbl th{padding:7px 8px;color:#94a3b8;font-weight:500;border-bottom:1px solid #e2e8f0;font-size:11px}
+.tbl td{padding:8px;border-bottom:1px solid #f1f5f9}
+
+/* ─── API SETUP ─── */
+.api-banner{background:#fefce8;border:1px solid #C9A227;border-radius:12px;padding:14px 16px;margin:16px 20px;display:flex;align-items:start;gap:10px;flex-shrink:0}
+.api-banner p{font-size:12px;color:#854F0B;line-height:1.6}
+.api-banner strong{display:block;font-size:13px;margin-bottom:3px}
+.api-input-row{display:flex;gap:8px;margin-top:8px}
+.api-input-row input{flex:1;padding:8px 11px;border:1.5px solid #C9A227;border-radius:8px;font-family:'Tajawal',sans-serif;font-size:12px;outline:none;direction:ltr}
+.api-save-btn{padding:8px 14px;background:#C9A227;color:#0A2647;border:none;border-radius:8px;font-family:'Tajawal',sans-serif;font-weight:700;font-size:12px;cursor:pointer}
+
+@media(max-width:700px){
+  .stats-row,.kpi-row{grid-template-columns:repeat(2,1fr)}
+  .two-col,.chart-row,.last-row{grid-template-columns:1fr}
+  .sb{width:200px}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ LOGIN ═══ -->
+<div id="loginPage">
+  <div class="card">
+    <div class="logo-row">
+      <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxITERUTExQWFRUXFx0WFxcYFxgdFxgWGRgXGBoaGBcdHSggGB0lGyAXITEhJikrLi4uHx8zODMtNygtLysBCgoKDg0OGhAQGy8lICYwLy0tLS0tNS0tMDAvLS0wLS0tLS0tLS8tLS0yLS0tLS0vLS0tLS0tLS0tLS0tLS0tLf/AABEIAOEA4QMBIgACEQEDEQH/xAAcAAEAAgMBAQEAAAAAAAAAAAAABQYCAwQHAQj/xABJEAACAAMFAwYKBggGAgMAAAABAgADEQQFEiExBkFREyJhcYGRFjJCUmKSobHB0RQjU3LS4QcVJDOCorLwVGNzk6PxNMJks/L/xAAZAQEAAwEBAAAAAAAAAAAAAAAAAQMEAgX/xAAtEQADAAIBAwMDAwQDAQAAAAAAAQIDESESMUEEIlETYXGBkaEyQrHBM6LwI//aAAwDAQACEQMRAD8A9xhCEAIQhACEIQAhCEACYhG2qs3Fj/CY6toLTydnc7yMI62yik3JdnLzMGLCAtSaV4bolIrummki1+FVn4v6sffCqzcW9UxweBo+2/kH4oeBo+2PqD5w4I3k+Dv8KbNxb1TDwps3FvVMcPgaPtT6g+cPA1ftT6g+cOBvJ8Hd4U2bi3qmHhTZuLeqY4fA1ftT6g+cfPA0fbH1B84cDeT4O/wps3FvVMfPCqzcX9Uxw+Bo+2PqD8UPA0fbH1B+KHA3k+Dt8K7P6fqxMWaerorqaqwqIol/XN9HwUbEGrnSlCKZRYdjbTikFd6NTsOY+MNCbfVpk/CEIgtEIQgBCEIAQhCAEIQgBCEIAQhCAEIQgBHFfNqMqQ7jUCi9ZyEdNonBFZm0UVPZFNv2/wAT5YRVK51JPRA4ulKIq13lOmgCY5YA1plr2RY9h7PzZkziQo6gKn3xnsTZ6I7+caDqH5mJprwWpAV2oaEqjEVGudM4ls4xx/czSwaZNcCY6KgVebhzYgk1qp3FYy/V7fbze9Pwx9sNUlM7ihJaYwOoBJIB6loI02WwAy1aYz4iMTfWOBU50yNBwiC42/q5vt53en4Y+fq1vt53ev4Y+fq6T57/AO8/4oxN3SfPf/ef8UCDP9Wt9vO71/DH39XN9vO70/DGsXbI89/95/xQF3SfPf8A3n/FAGz9XN9vO70/DGudLeUUblXZcYVg2GlGqBooPjYY+m65ZBwtMruImuaH1o+qDOstPKKU6nXL2MIA5NsZGKz4vMYHsJwn3+yKbY7dMlV5NytaVpvpF/W8xhBZJi5Z1RqDjnHHtbIxWct5hDdmh98SmV3G/cjZsxbmmyauasrEE8d49kS8UK4L5+j4gVLBqaHQiLndttWdLExcgdx1BEGicdqkdUIQiCwQhCAEIQgBCEIAQhCAEIRH2++JMlsLsQaVyBOUCG9dyQhEP4TWbzj6ph4S2bzj6p+UNEdc/Jo2wteGSEGrn2DM+2kQ2ztyLPV2ckAEAU3nf8I59obwE6biWuECi+8nv90W665AkWZa6hcTddKmJ7FS99/ZG6y2dLPJoK4UBYk672MJB5KQCwzAxMBvY5kd5j4lgBUYy7E+MMb0r90GlOiMreMRRPOcE/dTne8KO2ILzVaWmTFwckyhqBiWXJajFoeFY4dsZuGzgDynA7ACfeBG2/76NnKBVDFgSamlAKU+PdFZve+XtAUFQoU1yqczAqu0k15OKzWV3rh3cTSN36qmej60AtLMfSf2L+cYTrIgko2HnMdanTPdGSs1uuGtb0Qsc65322Z/qqZ6PrRrtFhdBialK0yNYXfZEbGCtSFqMzqP7EZ2JKyZq04MOyIea5fLXGt8fI6Ja42T2w8396v3WHtB9wiZl45bOBLLKWLKQy5YqEihPnYj2xS7ovJpDFgoNRQg141iy3JtAZ03k2ULkSCCdRTLurGwY7Wkn3JaVME1GBBGqMDSo3HTKNdnQTZGB96mW/3hVW9oMZSRhmuNzAOOvxW9gWPrWFakgutTXJ3Aqd9AaQLisX7s8kmVjQsaEYq08U5V040jdsVa83lHfzx7AfhE+svlZJR94KN1iqk9+cUS7p5kT1Y5YGo3V4rfGJKK1FJno8IhvCazec3qmHhNZvOb1TEFvXPyTMIiZO0dmZ0lhzic4VBU5mlfdEtAlNPsIQhAkQhCAEIQgBFG2uP7SehV+cXmKJtV/wCS3Uv9IiUVZv6TpsOzBmS1flKYgGph0r2xv8ED9qPV/OJ25xSzSv8ATU/ygx1BDTxj7PlDZKxTrsVyzbJ4XVjMBAIJGHWm7WJ+1ipVeLVPUufvpGfJek3s+UEk0NakmlM9w309ndEHalLsarWuJlTd4zfdXd2sR3GPgEiW2qK1N5FadsZyM3dv4R2a+2o7Iol5TTPtDEeU2EdQyEG0ltnN10m7aa0iZaGINQoCimmWZ9pjUZzSpKYDRmJY5Vy0+UYtYUBoZ0sEZEVGXtjdbZctyKTpYAAAGIfOMeXNFuV488HMxa3Xk1Wi12hcNXXnCvijTphaLVaECkuvOFfFGnTG23y5btUTpYAAAFRu7Y+21JbkUnSwAoGbD5xRDx+3c/ngspZOdP8Ak02W12h2wh1B6VEfJFrtDvhxqDnqo3RsscqWjhuWlmnpDh1x9ly5Ym4xOl+NWmIaHtiaeLb1PjjgifqaW2LLaHmY5cw1qpplTMRzXTP5OdLYmgDCvVofZWOtElibjE6XTETTEK0NctY0zrLLLEidLAJrqPnFmHLEU/h68HOSLen5Rd3mSJhALIx3Cor2QkSxLmFRkrioHBlyPeCvcYoby2kzQd6kMDx3xfZ0wFEmDQUevokZ+w17I2zSpbRM1ttPuZyspjDzgGHWKKf/AFiFvPZnlJrOrhQ2ZFK5798T02UGoakEbxrnu6tO4R85E+c3s+USdOU+GVjwQb7Uer+cYzdkyqk8oDQE0w8B1xahKPnH2fKNchi8vPU1HtIiTj6UfB4lsvbmm3lZnb7QADcAQchHusfn7Y80ttlP+anvj9AwZR6N7h/kQhCINYhCEAIQhACKFtMf2l+z3CL7FA2jP7RM6/gIlFOf+kul2j9nlj/LX+kRvneL3e+MbKtJaj0QPYI3RBcjS0tRqSOt2+ca8Mvzv+Q/OIjbP90n3/gYqsiyM9cK1p1D3xFNStsqrI1XSlsu982tZVnbCRWmEUO8/wBkxUbrGHFMPkDLrOQ/vpjidKEgihGojsmTVEgICCWbEwBzHCvDdFOZ9UqV5OJvddT8GF3SFZyXAIALNGFgkK80DCKEk06NaR0SObIdt7nCOr+6x9ucULv5qH2/9RVVcW1+EEuZT/LOQylabQAULUA6Kx02mxoZjAAqBQc1C27o0jVdiVmp1+4VjpLjHMJI8c6zSmQy0GvXHOanNcPsv9neNKlz8nM1kRSDmecKgyyopXiY+XnZ1SYQFAGRA7I3WsjAaFa9E5mPqmMr7pjVtxQH2mGHJVWup99jLCmXrxo03nZ1BUqoAZQaQtkhMEt1UAMKHLeNfjGN5W2WtllTGbmqSlRnnwy6o5bHe6TbLPwAkyaTKHKoOtP5omaaiafhtM4rXU0vK2SFo58lH3rzD8Ph3xZNlrYGkYGIqpw5nyTp8Y87uTaNXE6XMaXKDJVCzZYxuqTnu7orsy+JzZY+igA9kXYfbuPj/DK6zpObXlHvQly/O/nPzjNEQ6MTTg7fOPCrwui2InKTUcJlmWBpXSoBqO2LX+h6gm2gegvvMXJpraZ1HqW7UudbPSrLXnCpNGoK8KCPtkFFp6Tf1GEgZv8Ae+AjOUMu0+8xJqPAdnxhtkjonKP5gI/QMeA2IYbcvRaKf8ke/RLMXo+1L7iEIRBtEIQgBCEIAR5/f2domfe+Aj0CPP75/wDImffgUZ+yL9KHNHUIyjAuFAJIAyGZpmcgO+M4F5Xds/3afePuityrUmDA6vQNiBTWvAxY9tDzJf3j7oiLDKBRcCo2ZE3Ec1HR2Vij1LlT7kUrf1eDnmXtMJJCJTdiFT2mNtptU1ApwyjiFfFMYTPotTz213AkdhpG18LSEYnmo2FiNaaA/wBMZX9P2tS9eTtdfKbOK0Wx3ADBQBmAo48Y6rOMNnc+cae784wxWT7Ru4/hiIvjamzCUJVnblSGqcmAGuZJArmd0WNqlMTLS2VP27u2uxL3Mv1leCk/CNVmtRKlkWbMBY5y0lsK1z5zHWIfZa3zHW1TXNQkrIUyHjHIdkcNz8iJK4vo1d+MWjFrvwc3ujnNzVfoMF8Tr7snb4tU/kXIl2hKKTVpUjDlxIaoHSBEPtWxey2OYSTVCrZ6mi/IxnaTIwNT6LXCaUW1V03Vyr15RrtnPumQ3mTSvYS0Rj4cv7keoe1S+3+xdg5S67Qm+U4cdRofg0Ql03tNszl5QQllwsr1KkVB0G8fExI7LXrIk8uloYrLnSwlQCcxiG4GmTGNtLm/xE31W/BFu1LqaTafJnU1cxctJo67jvy1WqbyQlWReaWqZbEClOnpjiO2VpDfubKaHcpFaHcd0Suz62eX9JtNnZnlS5WAMwoTMPOIFQPQHWYiJAurCvKWmbjoMdEagamdOZpWsVL6bp+164Lm8vSuVvkytm0chhaDKlzxNtIAmco31aAa4M8+inRwpE7+iE/Xz/8ATH9UfLXYZIlzKypC2MSQ0merfWtNIFOsk4u4dmP6JG/aZo4yh/UPnGj0znT6Uc0r+tPUeqAR9hGEuarVwkGhwmh0I1B6Y0G08GnClvbotJ/+0x75Hgt7c23Tei0Mf+Sse8roIGL0ne/yfYQhA2iEIQAhCEAI8+vD/wAh/wDUP9Uegx5/eopaJn36+2sCjP2Ra9pqGyTVOAB0MusxgqDGMIJJ6TprHLsyUBYLaUmClRKQ1SWPRJJc94HACJG85csy1M1wiIyTMRIAqjBhUnKhOUZWG8JE0kSZsuYV8bk2VqdeE5QLvJDbaaS+s/CIKVdQdQ5ZRXj8TE/tmObLPpH3RDugayZ50b4/nFGeqSSl62ynSeSt/Bj+qx9qnfGyXIMsFeVk0bUMfdnrFcvO1S5K1wgsfFXj0noin2tBMbE4DHpGg4DgI5rDdcOv4M79VjjtPP5LveNwzJuX0qSq+aD7zXOODwNP+Jk9/wCcRFjuqxTZGFUw2sMFWXryta0KjcKVqfJpnqI6r32esVmlrLccpanocKUwoD5TDhu6SYrd2nrq/j+R0RS6ujj8/wAE1+rxZLDagZst2mYQMJGhIWlO0mIWw7SLLlrLpbeaKfVzpYSvogioHXGray4pFltASSlByYapzNSXGvUIx2duhrTOCjJVILtTRa+87vyiVE/Td0975OHlpZVjha1x8ncdq1IpS8M8s58qnDhHTs7ZhPu+bZzMRG5YMpY5Uoh013NGrbi7ElzscoCjLicLoprhrloCfbWIK6rvlzrRKSYtVZgp40PA7oKIrH1Tx5/YmstrN02t+P3J/wADT/iZHf8AnDwNP+Kk9/5xpXZ27vpU6yODLeoEljTCaqDhPFq7jrXLSOV7gsdnE4WtazlpyUtebygOjKfKFdfNpnrHP1Kf938HbxY1/Z/2J57lmmz/AEb6TZVlYsRpixsQa84l6a0OQGgjh8Dv/lSO/wDOKh9Cl+YvqiH0KX5i9wi2cNzvVfwUX6jDXee3HctPgGAGmLOlMVBY4ancTxoCaaxI/ooP7W/TKP8AUsc2xElZdmtrhQvMpllor/OO39E0v9pmHhKp3sPlE4arqqae9FqU9eOpWt7L/tLakWSyM7yzMBCskuY1KUrXApKjuNK0McmyFnQJMaWCqcq+BaMq4ThzwMARmDmREzeFmMyU8sO0sspAdTRlPEGOHZmzNLkUdy7cpMqSWIFHZQFxEsBQDUnUxoN/k8g2oWlvn/6x94Me5y9B1R5ZetnRrZMOEVM3Wm+tI9UUZQMvpp1V/k+whCBrEIQgBCEIARRNokpaJnTQ94i9xUNrpVJyt5y+0H/qBTnXsJ+e5aykrixNKqMAQvUrkVD80kHMYsuMROy94YWNndFR8yDykszJh1YzEDswbWpqezSO27E5axcmGKko0vENVqCoI6RkY4rDbuRElKWdJbfZLMYFahcVQoEsFiBVq679YFi50zq2ul1kg8GHtqPlFelTaWWeaVwAvTiAMXwMW++5OOzzB6NR1jP4RQLjvEPa5lnPiNLZT0sNf5S0UeoXs38clVPWRfdaKParQ0xi7an2DcBGqNtpkFHZDqrFT2Gkdmz9mEy0yUOhfPqALfCLHWp6jxlDq+nz2J2yhbvsonsoNqnLSUD5C0BqRuAGEt/CI0Xdd8i2SqymItqHHNE1s5pr4xOmE5UIFFFBSOTbK0mZbJldJf1ajgBr3tX2RCZgh1JV1NVZTRlPQf7EZ5xOp69+7/3Btr1ExX09e1f5+Sa2vt4nWgPgeWwlqry3FGVgXJHBhmKEZGJLZ++5cixTcKlpiuMaqQGwPzQ4J3DMdfXHXeFtlssuXeIUB1rJtUsUUigPPGZlNmK1qp6IhL62YmyByqETJVDSYpHincwrmDlpUZbso4Tm4UVwWXN48jyzzv8AdHXdl7D9XTpc4A4QJMpqDE4apVTxKUJrwzOcQtx2lZdolTHrhV6mgJJyNAAMySaCkdN07OWi0kEKQgrR3yUV1wjVif7MWG7eQkTOQsYFptVOdMY0lyhoSzjID0VqxrnE04hOZ52cTOTM5quNefk1XlYJA5S2W5SvK/urOD9ZXCAMwf3mQORou8xquq0LeEk2acf2iWC0mY1KsmmZG8ZBuOTdVZvGc8yc0ya/KPUripQBQdEXyV6O+FitRlTUmrqjBuseUO1ajujpYH0b3z4Ifqp6+lL2+f1NMyWVJVhQg0I4EZERjFk2+soS11GkxA/bVlPuiCs1mZzRe07gIvx31SmY8uPotyiz3TLK3VOYDOa+EdOar84n/wBF128nyzk1Jwr0DU090cdvkCTZLPIH3jXjmT7W9kWvYuRhswPnsW+A9giv0/PVXyz1IjVyvhE6THLdQ+pTpGL1iW+MZXnMwyXI1wkD7xFFHfSMLa4lSGI8hDTsFBGg1HnVi+stSnz5uLvaseox5xsjIxWqXwWrHsUge2kejwM/pv6W/uIQhA0iEIQAhCEAIgdrpFZav5pp2GJ6OW87Pykp14jLrGY9sDm1uWiI2QnVR04HF2N/17Y0zrJgE2VJlTprYQiYwolJTnoAThxKGI0rw3Rw7OWjBPUHRuaevd7YkNqJDK6zEZ1xKVduVmqiGq4Hwqee1aqEA5xbogivE9wT1km8pKVipXGoJUggjEK0IO8R4m7NZLaSdZU416UDUbvQnvEex3PakZMAd2dAA3KKVmGujFSBrQ5gUyPCPP8A9KF24J6TgMpown76016wfZEUtrRV6tPpVrwyJ25sQS08ovizQHB3VpQ/A9sQlitTSpiTVzZGDAcaajtFRFms6/S7twazrKe1koadfMy61iqRRh5lw/HBg9R7ciyT2fJcLXdkm8CbRZZqhyBykpsmVqDUDNTu0IOtY4vAi110T1/yisPIUnFSjbmBIbvGcZ8/TlZ1P9aZ84hY7nia4+6OnmwW+q5e/sy7W+52MmXLtlos0mXKFFNasRSmZcgaUyAiKW8bss1Po8uZa3XNcRPIqeILcxf4VMa9jbNZ3mTLPNRS05DgmMKuGAJIDtUjLnDqMRNrsrSpjS3FGQ4T8x0HWK5x7pzT/wBF951MrJC78b7kydpFtBK26ZNlSzkEkAiUB/mTBz26qARKXHdktMTXfarNMDLgKPTEB0FGqD1rFPkyWZgiirMaAcSYntr7JIlS5NkCIZijlJjgDECa0o2oqamnADjC8STUz58DF6h1Lu128mTbEWsaBD/F8xHRZtlUkUm22dKly1NStfGI3VNO4AkxU1DjSbOA4CbMp74+yLFjcas3nOzMQONWJpFv08j4dfsij6mBPcy9/dkve1tNttBmAFUoFXFqEFSCRuJJJp0xL3LYAZiS1GVanqGZJjls8gIuFf8As8TFgun6mRMtB1IwoOn/APVO4wtrHGp/CLMM/UydVflnLf00zLQwXPDzFpvI1/mNI9FsNnEuWiDyVA7hFD2SsRmWgE5hOeSd5rl7c+yPQ4txz0ykbMPubt+Tjt+bSk4uGPUnO9+GI7bO0YbMRvdgvZqfYIzuKyuJkwu2IrRBQsRiIDTGqd7HBUaCkQW3NrxTVljyBU9bflHZ3mrUNm7YKzZzJnCij3n4RcYh9lLLydmXi1XPbp7KRMQJwz0wkIQhAsEIQgBCEIAQhCAKPfVmMqe1MqnGvfXLtiwXiJk+zLMkYTNUiZLDeJjXKjZjLXfGO09jxy8YGaa/dOscmylt1lH7y/EfHviDPPsyOfk0We/R9IDuA2SyjyWctA70xGYwXlKvhWiA4d+sS21N0/SbM8vyqYk++Mx36dsQ95oLJMVuRWYihuRMyYqrLPjcnKAllsR0UdFBFmsM5mRTMUI5UMyBsWEndWgrTStIktaVJyzxW4L0NktImNUJnLmjgldacVIr1Vjp2sufkJ1UH1UznIRp0r2a9RETn6Rrg5OZ9JQcxzRwB4r8eo+/rjg2btaWiT9Anmh1s7nXLPB1rnTiteEZ8ic11r9TzFj74K7rmWVeEdNusbyZjS5goynsI3EcQY0Ui1PfKMDXS9MxUkEFSVZSGVhqGGYIizte9itiqLW/0a0qKY9Jb9IY5U6CQRWIiz3dVcTOgqDRS6hvEcqTU5AsKCusa5thUOVxI4Ar46KHz0RiSOnq3RVamvyasVXC01tPwyclXnYLFU2d/pdpIoCPEWu8sOao40JYxWZsx3ZndsTscTNxY8BuGlBwESEu6RQ0mSVFAQDMTUhTTI6ipH8JjKXYFVSzTJRqjUXEpOLASBkda5QlTPPdk5XdrpS1JGKtchqYnrDZcC+kdT8I5rpsvln+H5xKKpJoBUnIAaxaVY4N1gshmzAg36ngN5jsv+1BmWUniSub1vSh9XTrrHVOYWSVgBBnzBr5i8ezOnE9Uatlrq5aaCfEShbpOoHbqfzimP8A6V1eF2PR6eiVjXd9y07KXfyUgEijPzj0DcO6N96yppo8otuFEKg0ox8s4SC2Cu+lY7rSQEarYBQ1bLmimueWUQ1wJR2COGlqBmh+qJO7Aa8mwFCQppmMhGk2JKUkiTskvkpPPOYBeY3FjVnPVWsefKGtVp6Zj59C/ksWjbS8MEsSgec+vQo49Zy745th7v8AGnEeivxPw74gz5ffkUL8stiqAABoMo+whEmoQhCAEIQgBCEIAQhCAPjKCCDocopFukNZ53N3HEp4j+8ovER193fysvLxlzHT0QKssdS47mq3VtFnDygvKLz5eLMLMAIzGhOZpWtDQ7o+2KXKs8kznJUsoaY8w/WE0rRumpoFGQ0AiDuG8eSfC3iMc/RPH4f9RN3vZnaZKmoqTBLDnC7FVDMFwzAaEVUBh1MaQJx31Lfk7bTISdKKOKo65gihoeg5gx4ztHcj2WdyZJ86XMGRyOTA7mBpHpFz3y+OY05vqsHKcqeap52GktNVl8Cc2OfCJW+7pl2qSZb9asNVO4j5RDWyrPhWVbXddjzyxWpLxliTOolslrzH0WaOIH9S+Tuyis2yxvKcy5i4WGo+I4g8Y6r+uObZpgWZUEHFLmLlocmQ7iOG6Jax39JtKrZ7wokzSXaVFFY7g25G415p6IzaePt2MFJZvbXFr+SDu+RLd8LiY7GioksAsxJz5zZKAKt0xJpcErEJeItyk2ZLlMoXAOSFcTjfU5c3pjbarDabAXIly5iOuHlCHoFO4YGBQnf7IjbNfExBREkgAlkyf6osuFuT52YI3NWhid1XMvghKIXTk7iXdEtpCOrBpjTllEBeauJSaEkZkGlaZDSOqfccvMy8VEnNJfEFzKgNiXDuNaUOYiOS2OJfJCgGMTQ2eMOoKih0pnXTWLTYUn2gBcCKSxmPgDBcbAVYliaZAZCHuT23wMfRkWpXJyIlaADoAHsETsuWljUTJgxTmyROHT0dJ7BGMy0SrJVZdJtopmfJTrO7q1MRtlss2fN3vMbxmPD/ANVHD4xD3l/H+TTMrF968L4Fls8y0TqVxTHNSdwHwUDd8THo92WFZMsIu7U8TvMaLlulLOlBmx8ZuPQOAjumzQqliaAamNKSRpxYun3V3ZovGYAhBGIvzAvnFgcj0UqT0Axrs0lLPJJY1oMTudWagqSTqTQDujKyyizcq4oaURfNU0rX0jQE8Mh11ba6+Mbcihqq+MeLDd1DLt6ok7yZFE7ZFTne1WjpdqAcF3dwj0OxWZZctUXRRT++2IPY+6uTTlWHOcc3oXj1mLHEFeCGl1V3YhCESaBCEIAQhCAEIQgBCEIAQhCAK1tFdVCZqDLygOPGOa4r85NxJmnmOaS2JyDeYeg6ju4RbSKxT9pLiABIFZba8VMQZss1D64/VEtfVzGbMSYhowAQE5rLFSeUCaO40WuQrWOG57zlyuWRcbqkwqAKkIqAB3mTGyDF+UY1NT2xw7ObTmUws9qbolzToRuDfPv4xP3/AHc02WqKKy8VZktWwM67sLjSjUam+lK8ZLMeSci6pN02XZ7bJ8mYjaHep96sO+PONpdi5sirIDOlHXKpA9Jd46dItEydaFtCrKEyooqnCgE8oyJOefkCAAVCkDiRwifu++pc0kAOozozgBXAbASpqfKyoaHog0cZsEZVz3+TyK5r+tNlGFDy0n7GYTkP8uYa4R6JqIlltN12o5k2KafJeiqWO4E8xs+BEXa+9jrNPqwHJP5yaHrXQxRb42KtMqvME5OK55dKnP3xRWJPlcfgy0s2NatdcnbIu67pDUmT/pExcyiUNOGJVJp2mN9tvqbMGCWvIS+C+OR1jJOzvjRs1snO5MBZYlg5ksMPs10i6XbszJl5v9Y3Tp3b+2E4V3rksxq3OonpRVrl2fmTaUGBN7HfxI849MXew2GVZ0otBxY6k9J9wjrfJThAqBkNB0DTIRF2W+lbmlSXIxqoAqykkA0rzab8VKRfo0Y8Ux+TtttoIkl11oCA1Vyyy4hqZDppEfdF3uTyk0nMgqhFKkaPMGnKUppQVFddOi7rtK0LmtCSiVqksHcDq1OJ03UiO2h2hEusuUavoW3L8zA7ulK2xtRfnJgypZ558YjyR8/dERsxc3Ktyjj6tTofKPDq4xpuK52tDYmqErzm3k8BxMX2TKVVCqKAZARBniXlrrrt4RmBCEIk1iEIQAhCEAIQhACEIQAhCEAIQhACPhFcjH2EAVPaPZkOpKAldcI1U8V+UQNzbQzrERLnVmSdx3r908PRPZHpURN7XDKnA5AE65ZHrHxiNfBkyYGn143pmcqdKtUvlJMyjYSFdfGSpBIKnpUVB4RHi7HRi89g0tWNoYIpCmYFCqFl1JpkXOebkGKhbrltNjmcpJLL1b+jg46DEzc23w8S0phOmNdK9KajsrBMiPVLfTkWn/BI2flLHLksxcrMfC8mmPk8SuyrKoMWRCrmSKVOWsWSzTGZFZlKEipUkEr0EjKvVHNZrRIn4ZiMkzDXCQQcJIoctxpl2x2xJrX2EcNot4lzML+KwqhAJJYeMtAMzShHbwjuiPSxpKozTDhSuAMQAlctd+WQrugSa0WeztmZaNQioq4oADTVUrlrU65cOlJUmQhOSAmrMdWPEnVjEPeO1aLlKGM+ccl7N5iusbRan8pzw8lfgIjZnv1ErieWSV9bTM9UlVVN7Z4j1eaPb1RpuLZ1ptHmArL9rdXR0xM3RsykujTKO3CnNHziwQ18nM4at9WT9jCTKVVCqAAMgBGcIRJqEIQgBCEIAQhCAEIQgBCEIAQhCAEIQgBCEIAQhCAMZksMKEAjgYrd87HSZ1SnMb+/73xZoQ0cXjm1qls8kvC4LXZGxgNQeWhPtppHbde3Vol5TaTl6aBu8ZHtEenRCXrstZp9SyYG85Mj25UPaI518GN+kuHvDWvsRFr2tmMPq1CV3nM/L3xHS7NaLSa85/SPijtOQ7Itdg2ckSqZFyN7Z+zSJgCGn5O1gu/+Sv0RWbu2TUZzmxHzVyHadYsNns6ouFFCgbhG2ETo0RjmP6UIQhElghCEAIQhACEIQAhCEAIQhACEIQAhCEAIQhACEIQAhCEAIQhACEIQAhCEAIQhACEIQAhCEAIQhACEIQAhCEAIQhAH/9k=" alt="شعار جامعة المستقبل">
+      <div>
+        <h1>Mustaqbal <span style="color:#C9A227">GPT</span></h1>
+        <span>المساعد الأكاديمي الذكي</span>
+      </div>
+    </div>
+    <p class="sub">منصة جامعة المستقبل — أول مساعد ذكي مخصص للتعليم الجامعي في العراق</p>
+
+    <div class="tabs">
+      <button class="tab active" id="t-student" onclick="setRole('student',this)">
+        <em>🎓</em><span>طالب</span>
+      </button>
+      <button class="tab" id="t-teacher" onclick="setRole('teacher',this)">
+        <em>👨‍🏫</em><span>تدريسي</span>
+      </button>
+      <button class="tab" id="t-admin" onclick="setRole('admin',this)">
+        <em>🛡️</em><span>إدارة</span>
+      </button>
+    </div>
+
+    <p class="ql-title">— دخول سريع تجريبي (اضغط مباشرة) —</p>
+    <div class="ql-row">
+      <button class="ql" onclick="quickLogin('student')">🎓 طالب</button>
+      <button class="ql" onclick="quickLogin('teacher')">👨‍🏫 تدريسي</button>
+      <button class="ql" onclick="quickLogin('admin')">🛡️ إدارة</button>
+    </div>
+
+    <div class="field">
+      <label id="id-lbl">الرقم الجامعي</label>
+      <input type="text" id="uid" placeholder="مثال: 2024001234" dir="ltr">
+    </div>
+    <div class="field">
+      <label>الكلية</label>
+      <select id="col">
+        <option value="">— اختر كليتك —</option>
+        <option>كلية الطب</option>
+        <option>كلية الصيدلة</option>
+        <option>كلية طب الأسنان</option>
+        <option>كلية التمريض</option>
+        <option>كلية الصحة والتقنيات الطبية</option>
+        <option>كلية الهندسة</option>
+        <option>كلية هندسة تقنيات الحاسوب</option>
+        <option>كلية الإدارة والاقتصاد</option>
+        <option>كلية القانون</option>
+        <option>كلية العلوم</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>كلمة المرور</label>
+      <input type="password" id="pwd" placeholder="••••••••" dir="ltr">
+    </div>
+    <button class="btn-login" id="loginBtn" onclick="doLogin()">
+      <span id="login-txt">دخول إلى النظام</span>
+      <div class="spin" id="login-spin"></div>
+    </button>
+    <p class="note">🔒 بياناتك محمية وفق سياسات الخصوصية في الجامعة</p>
+  </div>
+</div>
+
+<!-- ═══ APP ═══ -->
+<div id="app">
+  <!-- Sidebar -->
+  <div class="sb">
+    <div class="sb-top">
+      <div class="sb-logo">
+        <img src="data:image/jpeg;base64,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" alt="شعار جامعة المستقبل">
+        <div class="sb-logo-text">
+          <h3>جامعة المستقبل</h3>
+          <small>Al-Mustaqbal University</small>
+        </div>
+      </div>
+      <div class="badge"><div class="dot"></div><span>Mustaqbal GPT • مباشر</span></div>
+    </div>
+
+    <button class="new-chat" id="newChatBtn" onclick="startNewChat()">＋ محادثة جديدة</button>
+
+    <div class="sb-nav">
+      <button class="nav-btn active" id="nav-chat" onclick="goTo('chat')"><em>💬</em>المحادثة</button>
+      <button class="nav-btn" id="nav-dash" onclick="goTo('dash')"><em>📊</em>لوحة التقدم</button>
+      <button class="nav-btn" id="nav-admin" onclick="goTo('admin')"><em>🛡️</em>لوحة الإدارة</button>
+
+      <div class="recent-title">المحادثات السابقة</div>
+      <div class="recent-item">🧬 شرح نظرية الخلية</div>
+      <div class="recent-item">⚡ قانون أوم والتطبيقات</div>
+      <div class="recent-item">📐 التفاضل والتكامل</div>
+      <div class="recent-item">💊 حساب جرعات الأدوية</div>
+    </div>
+
+    <div class="sb-footer">
+      <div class="user-row">
+        <div class="user-av" id="userAv">👤</div>
+        <div class="user-info">
+          <div class="user-name" id="userName">مستخدم</div>
+          <div class="user-col" id="userCol">جامعة المستقبل</div>
+        </div>
+        <button class="logout" onclick="doLogout()">🚪</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <div><button class="tb-bell">🔔</button></div>
+      <input class="tb-search" type="text" placeholder="🔍 ابحث...">
+    </div>
+
+    <!-- CHAT PAGE -->
+    <div id="page-chat" class="page active">
+      <div class="chat-top">
+        <div class="ai-av">🧠</div>
+        <div>
+          <div class="chat-name">Mustaqbal GPT</div>
+          <div class="chat-status"><div class="online-dot"></div><span id="chatStatus">متصل • جامعة المستقبل</span></div>
+        </div>
+      </div>
+
+      <div id="apiBanner" class="api-banner" style="display:none">
+        <span style="font-size:20px;flex-shrink:0">🔑</span>
+        <div>
+          <p><strong>أضف Claude API Key لتشغيل الذكاء الاصطناعي الحقيقي</strong>
+          احصل عليه من console.anthropic.com — مجاناً للبداية</p>
+          <div class="api-input-row">
+            <input type="text" id="apiKeyInput" placeholder="sk-ant-..." dir="ltr">
+            <button class="api-save-btn" onclick="saveApiKey()">حفظ</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="messages" id="messages">
+        <div class="msg ai">
+          <div class="msg-av">🧠</div>
+          <div>
+            <div class="msg-bub">أهلاً وسهلاً! أنا <strong>Mustaqbal GPT</strong> 🎓<br>اسألني بالعربي أو باللهجة العراقية عن أي شي يخص دراستك، وراح أساعدك فوراً!</div>
+            <div class="msg-time">الآن</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="quick-acts" id="quickActs">
+        <button class="qa" onclick="sendQuick('لخّص لي محاضرة')">📄 تلخيص محاضرة</button>
+        <button class="qa" onclick="sendQuick('أعطني أسئلة تدريبية في مادتي')">🎯 أسئلة تدريبية</button>
+        <button class="qa" onclick="sendQuick('اشرحلي مفهوم صعب')">🧠 شرح مفهوم</button>
+        <button class="qa" onclick="sendQuick('ساعدني في مشروع التخرج')">📚 مشروع التخرج</button>
+      </div>
+
+      <div class="input-wrap">
+        <div class="input-box">
+          <button class="icon-btn">📎</button>
+          <button class="icon-btn">🎤</button>
+          <textarea id="msgInput" rows="1" placeholder="اسأل Mustaqbal GPT أي شي..."
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}"
+            oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,110)+'px'"></textarea>
+          <button class="send-btn" id="sendBtn" onclick="sendMsg()">⬆</button>
+        </div>
+        <p class="hint">Mustaqbal GPT قد يخطئ أحياناً • تحقق من المعلومات المهمة</p>
+      </div>
+    </div>
+
+    <!-- DASHBOARD PAGE -->
+    <div id="page-dash" class="page">
+      <div class="dash-wrap">
+        <div class="welcome-box">
+          <div style="position:relative;z-index:1">
+            <div style="font-size:11px;color:#E8C547;font-weight:600;margin-bottom:8px">✨ أهلاً وسهلاً</div>
+            <div style="font-size:24px;font-weight:900;color:white;margin-bottom:4px">مرحباً <span style="color:#E8C547" id="welcomeName">بك</span>!</div>
+            <div style="font-size:13px;color:rgba(255,255,255,.72)" id="welcomeSub">جاهز للتعلّم اليوم؟</div>
+            <button onclick="goTo('chat')" style="margin-top:14px;background:#C9A227;color:#0A2647;border:none;border-radius:10px;padding:9px 20px;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:700;cursor:pointer">+ محادثة جديدة</button>
+          </div>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat"><div style="font-size:22px;margin-bottom:4px">💬</div><div class="stat-val">42</div><div class="stat-lbl">المحادثات</div></div>
+          <div class="stat"><div style="font-size:22px;margin-bottom:4px">⏰</div><div class="stat-val">28</div><div class="stat-lbl">ساعات الدراسة</div></div>
+          <div class="stat"><div style="font-size:22px;margin-bottom:4px">🎯</div><div class="stat-val">156</div><div class="stat-lbl">الأسئلة التدريبية</div></div>
+          <div class="stat"><div style="font-size:22px;margin-bottom:4px">📈</div><div class="stat-val">87%</div><div class="stat-lbl">معدل التقدم</div></div>
+        </div>
+
+        <div class="two-col">
+          <div class="panel">
+            <div class="panel-head">
+              <span style="font-size:12px;color:#C9A227;font-weight:600;cursor:pointer">عرض الكل</span>
+              <span class="panel-title">تقدمك الدراسي</span>
+            </div>
+            <div class="prog-item">
+              <div class="prog-row"><span style="color:#C9A227;font-weight:700">82%</span><span style="font-weight:600;color:#0A2647">📖 علم التشريح</span></div>
+              <div class="prog-bar"><div class="prog-fill" style="width:82%;background:#C9A227"></div></div>
+            </div>
+            <div class="prog-item">
+              <div class="prog-row"><span style="color:#144272;font-weight:700">67%</span><span style="font-weight:600;color:#0A2647">🧪 الكيمياء العضوية</span></div>
+              <div class="prog-bar"><div class="prog-fill" style="width:67%;background:#144272"></div></div>
+            </div>
+            <div class="prog-item">
+              <div class="prog-row"><span style="color:#15803d;font-weight:700">91%</span><span style="font-weight:600;color:#0A2647">💊 علم الأدوية</span></div>
+              <div class="prog-bar"><div class="prog-fill" style="width:91%;background:#15803d"></div></div>
+            </div>
+            <div class="prog-item">
+              <div class="prog-row"><span style="color:#dc2626;font-weight:700">54%</span><span style="font-weight:600;color:#0A2647">🫀 الفسيولوجيا</span></div>
+              <div class="prog-bar"><div class="prog-fill" style="width:54%;background:#dc2626"></div></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title">النشاط الأخير</span></div>
+            <div class="act-item"><div class="act-ico">🧬</div><div><div style="font-size:12px;font-weight:600;color:#0A2647">شرح الهيموغلوبين</div><div style="font-size:10px;color:#94a3b8;margin-top:2px">قبل ساعة • <span style="color:#C9A227">الأحياء</span></div></div></div>
+            <div class="act-item"><div class="act-ico">🎯</div><div><div style="font-size:12px;font-weight:600;color:#0A2647">20 سؤال تدريبي</div><div style="font-size:10px;color:#94a3b8;margin-top:2px">قبل 3 ساعات • <span style="color:#C9A227">الكيمياء</span></div></div></div>
+            <div class="act-item"><div class="act-ico">📄</div><div><div style="font-size:12px;font-weight:600;color:#0A2647">تلخيص الجهاز العصبي</div><div style="font-size:10px;color:#94a3b8;margin-top:2px">أمس • <span style="color:#C9A227">التشريح</span></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN PAGE -->
+    <div id="page-admin" class="page">
+      <div class="admin-wrap">
+        <div class="admin-head">
+          <button class="export-btn" onclick="doExport()">
+            📊 تصدير تقرير Excel
+            <div class="spin" id="exportSpin"></div>
+          </button>
+          <div style="text-align:right">
+            <div style="font-size:20px;font-weight:900;color:#0A2647">لوحة التحكم الإدارية</div>
+            <div style="font-size:12px;color:#64748b;margin-top:2px">نظرة شاملة على Mustaqbal GPT</div>
+          </div>
+        </div>
+
+        <div class="kpi-row">
+          <div class="kpi"><div class="kpi-ico">👥</div><div class="kpi-val">12,847</div><div class="kpi-lbl">إجمالي المستخدمين</div></div>
+          <div class="kpi"><div class="kpi-ico">⚡</div><div class="kpi-val">8,234</div><div class="kpi-lbl">المستخدمون النشطون</div></div>
+          <div class="kpi"><div class="kpi-ico">💬</div><div class="kpi-val">284K</div><div class="kpi-lbl">الأسئلة المطروحة</div></div>
+          <div class="kpi"><div class="kpi-ico">⭐</div><div class="kpi-val">94%</div><div class="kpi-lbl">معدل الرضا</div></div>
+        </div>
+
+        <div class="chart-row">
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title">الاستخدام الأسبوعي</span></div>
+            <div class="bar-chart">
+              <div class="bar-col"><div class="bar" style="height:45%"></div><div class="bar-lbl">سبت</div></div>
+              <div class="bar-col"><div class="bar" style="height:62%"></div><div class="bar-lbl">أحد</div></div>
+              <div class="bar-col"><div class="bar" style="height:78%"></div><div class="bar-lbl">اثنين</div></div>
+              <div class="bar-col"><div class="bar" style="height:55%"></div><div class="bar-lbl">ثلاثاء</div></div>
+              <div class="bar-col"><div class="bar" style="height:88%"></div><div class="bar-lbl">أربعاء</div></div>
+              <div class="bar-col"><div class="bar" style="height:95%"></div><div class="bar-lbl">خميس</div></div>
+              <div class="bar-col"><div class="bar" style="height:40%"></div><div class="bar-lbl">جمعة</div></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title">الكليات الأكثر نشاطاً</span></div>
+            <div class="col-item"><div class="col-row"><div class="col-pct">92%</div><div class="col-name">كلية الطب</div></div><div class="prog-bar"><div class="prog-fill" style="width:92%;background:#C9A227"></div></div></div>
+            <div class="col-item"><div class="col-row"><div class="col-pct">88%</div><div class="col-name">كلية الصيدلة</div></div><div class="prog-bar"><div class="prog-fill" style="width:88%;background:#144272"></div></div></div>
+            <div class="col-item"><div class="col-row"><div class="col-pct">85%</div><div class="col-name">كلية الهندسة</div></div><div class="prog-bar"><div class="prog-fill" style="width:85%;background:#15803d"></div></div></div>
+            <div class="col-item"><div class="col-row"><div class="col-pct">72%</div><div class="col-name">كلية القانون</div></div><div class="prog-bar"><div class="prog-fill" style="width:72%;background:#7c3aed"></div></div></div>
+          </div>
+        </div>
+
+        <div class="last-row">
+          <div class="panel">
+            <div class="panel-head"><span style="font-size:12px;color:#C9A227;font-weight:600;cursor:pointer">عرض الكل</span><span class="panel-title">الأسئلة الأكثر شيوعاً</span></div>
+            <table class="tbl">
+              <thead><tr><th>#</th><th>مرة</th><th>المادة</th><th>السؤال</th></tr></thead>
+              <tbody>
+                <tr><td style="font-weight:900;color:#C9A227">1</td><td style="font-weight:700;color:#0A2647">1,240</td><td style="color:#64748b">أحياء</td><td style="font-weight:600">شرح نظرية الخلية</td></tr>
+                <tr><td style="font-weight:900;color:#C9A227">2</td><td style="font-weight:700;color:#0A2647">987</td><td style="color:#64748b">فيزياء</td><td style="font-weight:600">قانون أوم والتطبيقات</td></tr>
+                <tr><td style="font-weight:900;color:#C9A227">3</td><td style="font-weight:700;color:#0A2647">845</td><td style="color:#64748b">قانون</td><td style="font-weight:600">المادة 56 من الدستور</td></tr>
+                <tr><td style="font-weight:900;color:#C9A227">4</td><td style="font-weight:700;color:#0A2647">712</td><td style="color:#64748b">صيدلة</td><td style="font-weight:600">حساب جرعات الأدوية</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="sys-panel">
+            <div style="font-weight:700;font-size:14px;margin-bottom:13px;color:white">حالة النظام</div>
+            <div class="sys-row"><div class="sys-val"><div class="sys-dot" style="background:#22c55e"></div>1.2 ث</div><div class="sys-lbl">وقت الاستجابة</div></div>
+            <div class="sys-row"><div class="sys-val"><div class="sys-dot" style="background:#22c55e"></div>يعمل</div><div class="sys-lbl">Claude API</div></div>
+            <div class="sys-row"><div class="sys-val"><div class="sys-dot" style="background:#22c55e"></div>يعمل</div><div class="sys-lbl">قاعدة البيانات</div></div>
+            <div class="sys-row"><div class="sys-val"><div class="sys-dot" style="background:#facc15"></div>68%</div><div class="sys-lbl">التخزين</div></div>
+            <button onclick="alert('النظام يعمل بشكل طبيعي ✅')" style="width:100%;margin-top:12px;padding:10px;background:#C9A227;color:#0A2647;border:none;border-radius:10px;font-family:'Tajawal',sans-serif;font-weight:700;font-size:13px;cursor:pointer">تفاصيل النظام</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ═══ STATE ═══
+var role = 'student';
+var busy = false;
+var apiKey = localStorage.getItem('mgpt_api_key') || '';
+var history = [];
+
+// ═══ LOGIN ═══
+function setRole(r, btn) {
+  role = r;
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+  btn.classList.add('active');
+  var labels = {student:'الرقم الجامعي', teacher:'رقم التدريسي', admin:'رمز الإدارة'};
+  document.getElementById('id-lbl').textContent = labels[r];
+}
+
+function quickLogin(r) {
+  var data = {
+    student: {uid:'2024001234', col:'كلية الطب', pwd:'demo'},
+    teacher: {uid:'T-00456',    col:'كلية الهندسة', pwd:'demo'},
+    admin:   {uid:'ADMIN-001',  col:'كلية الطب', pwd:'demo'}
+  };
+  setRole(r, document.getElementById('t-'+r));
+  document.getElementById('uid').value = data[r].uid;
+  document.getElementById('col').value = data[r].col;
+  document.getElementById('pwd').value = data[r].pwd;
+  setTimeout(doLogin, 100);
+}
+
+function doLogin() {
+  var uid = document.getElementById('uid').value.trim();
+  var col = document.getElementById('col').value;
+  if (!uid) { alert('يرجى إدخال الرقم الجامعي'); return; }
+  if (!col) { alert('يرجى اختيار الكلية'); return; }
+
+  var spin = document.getElementById('login-spin');
+  var txt  = document.getElementById('login-txt');
+  spin.style.display = 'block';
+  txt.textContent = 'جاري الدخول...';
+  document.getElementById('loginBtn').disabled = true;
+
+  setTimeout(function(){
+    // hide login, show app
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('app').classList.add('show');
+
+    // set user info
+    document.getElementById('userName').textContent = uid;
+    document.getElementById('userCol').textContent  = col;
+    document.getElementById('chatStatus').textContent = 'متصل • ' + col;
+    document.getElementById('welcomeName').textContent = uid;
+    document.getElementById('welcomeSub').textContent  = col + ' — جاهز للتعلّم اليوم؟';
+    var avMap = {student:'🎓', teacher:'👨‍🏫', admin:'🛡️'};
+    document.getElementById('userAv').textContent = avMap[role];
+
+    // show API banner if no key
+    if (!apiKey && role !== 'admin') {
+      document.getElementById('apiBanner').style.display = 'flex';
+    }
+
+    // configure nav by role
+    if (role === 'admin') {
+      document.getElementById('nav-chat').style.display  = 'none';
+      document.getElementById('nav-dash').style.display  = 'none';
+      document.getElementById('newChatBtn').style.display = 'none';
+      goTo('admin');
+    } else {
+      document.getElementById('nav-admin').style.display = 'none';
+      goTo('chat');
+    }
+
+    spin.style.display = 'none';
+    txt.textContent = 'دخول إلى النظام';
+    document.getElementById('loginBtn').disabled = false;
+  }, 700);
+}
+
+function doLogout() {
+  document.getElementById('app').classList.remove('show');
+  document.getElementById('loginPage').style.display = 'flex';
+  document.getElementById('uid').value = '';
+  document.getElementById('col').value = '';
+  document.getElementById('pwd').value = '';
+  history = [];
+  resetChat();
+  // restore nav
+  ['nav-chat','nav-dash','nav-admin','newChatBtn'].forEach(function(id){
+    document.getElementById(id).style.display = '';
+  });
+  setRole('student', document.getElementById('t-student'));
+}
+
+// ═══ NAVIGATION ═══
+function goTo(page) {
+  ['chat','dash','admin'].forEach(function(p){
+    document.getElementById('page-'+p).classList.remove('active');
+    var n = document.getElementById('nav-'+p);
+    if (n) n.classList.remove('active');
+  });
+  document.getElementById('page-'+page).classList.add('active');
+  var nav = document.getElementById('nav-'+page);
+  if (nav) nav.classList.add('active');
+}
+
+function startNewChat() {
+  history = [];
+  resetChat();
+  document.getElementById('quickActs').style.display = 'flex';
+  goTo('chat');
+  document.getElementById('msgInput').focus();
+}
+
+function resetChat() {
+  document.getElementById('messages').innerHTML =
+    '<div class="msg ai"><div class="msg-av">🧠</div><div>' +
+    '<div class="msg-bub">أهلاً! كيف أقدر أساعدك اليوم؟ 🎓</div>' +
+    '<div class="msg-time">الآن</div></div></div>';
+}
+
+// ═══ CHAT ═══
+function saveApiKey() {
+  var key = document.getElementById('apiKeyInput').value.trim();
+  if (!key.startsWith('sk-ant-')) { alert('المفتاح يجب أن يبدأ بـ sk-ant-'); return; }
+  apiKey = key;
+  localStorage.setItem('mgpt_api_key', key);
+  document.getElementById('apiBanner').style.display = 'none';
+  alert('✅ تم حفظ المفتاح! الذكاء الاصطناعي الآن يعمل بشكل حقيقي');
+}
+
+function sendQuick(text) {
+  document.getElementById('msgInput').value = text;
+  document.getElementById('quickActs').style.display = 'none';
+  sendMsg();
+}
+
+function getTime() {
+  return new Date().toLocaleTimeString('ar', {hour:'2-digit', minute:'2-digit'});
+}
+
+function appendMsg(role2, text) {
+  var c = document.getElementById('messages');
+  var d = document.createElement('div');
+  d.className = 'msg ' + role2;
+  var f = text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/
+/g,'<br>');
+  d.innerHTML = '<div class="msg-av">'+(role2==='ai'?'🧠':'👤')+'</div>' +
+    '<div><div class="msg-bub">'+f+'</div><div class="msg-time">'+getTime()+'</div></div>';
+  c.appendChild(d);
+  c.scrollTop = c.scrollHeight;
+}
+
+async function sendMsg() {
+  var inp  = document.getElementById('msgInput');
+  var text = inp.value.trim();
+  if (!text || busy) return;
+
+  document.getElementById('quickActs').style.display = 'none';
+  inp.value = ''; inp.style.height = 'auto';
+  busy = true;
+  document.getElementById('sendBtn').disabled = true;
+
+  history.push({role:'user', content: text});
+  appendMsg('user', text);
+
+  // typing indicator
+  var c  = document.getElementById('messages');
+  var td = document.createElement('div');
+  td.id  = 'typing'; td.className = 'msg ai';
+  td.innerHTML = '<div class="msg-av">🧠</div><div><div class="typing"><span></span><span></span><span></span></div></div>';
+  c.appendChild(td); c.scrollTop = c.scrollHeight;
+
+  var aiReply = '';
+
+  if (apiKey) {
+    // ─── Real Claude API ───
+    try {
+      var res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type':      'application/json',
+          'x-api-key':         apiKey,
+          'anthropic-version': '2023-06-01'
+        },
+        body: JSON.stringify({
+          model:      'claude-haiku-4-5-20251001',
+          max_tokens: 1024,
+          system: 'أنت Mustaqbal GPT، المساعد الأكاديمي الذكي لجامعة المستقبل في العراق. تتحدث العربية الفصحى واللهجة العراقية بطلاقة. تساعد الطلاب في فهم مناهجهم الدراسية وتقديم شروحات واضحة وأسئلة تدريبية. كن ودوداً ومفيداً.',
+          messages: history
+        })
+      });
+      if (res.ok) {
+        var data = await res.json();
+        aiReply = data.content[0].text;
+      } else {
+        throw new Error('API error');
+      }
+    } catch(e) {
+      aiReply = 'عذراً، حدث خطأ في الاتصال بالذكاء الاصطناعي. تحقق من صحة المفتاح وحاول مجدداً.';
+    }
+  } else {
+    // ─── Demo responses ───
+    await new Promise(function(r){ setTimeout(r, 900 + Math.random()*700); });
+    var demos = [
+      'سؤال ممتاز دكتور! خليني أشرحلك خطوة بخطوة:
+
+**المفهوم الأساسي:**
+هذا الموضوع يعتمد على فهم العلاقة بين المكونات الرئيسية في المادة.
+
+**التطبيق العملي:**
+١. فهم النظرية الأساسية أولاً
+٢. تطبيقها على أمثلة بسيطة
+٣. الانتقال للمسائل الأصعب
+
+تحب أعطيك أسئلة تدريبية؟ 📚',
+      'هذا موضوع مهم بمنهجك! بختصار:
+
+الفكرة الأساسية هي فهم السببية بين المتغيرات.
+
+**مثال عملي:** لو كان عندك مريض يعاني من هذا الحال، الخطوات تكون:
+• التشخيص الدقيق
+• اختيار العلاج المناسب
+• المتابعة والتقييم
+
+عندك سؤال ثاني؟ 🎯',
+      'بالنسبة لسؤالك، هذا من المحاور المهمة:
+
+**النقطة الأولى:** التعريف والمفهوم الأساسي للموضوع
+**النقطة الثانية:** الآلية والكيفية
+**النقطة الثالثة:** التطبيقات العملية
+
+💡 نصيحة: اربط هذا الموضوع بما درسته سابقاً لتثبيت المعلومة.
+
+تريد ملخصاً أو أسئلة تدريبية؟ 📖'
+    ];
+    aiReply = demos[Math.floor(Math.random() * demos.length)];
+  }
+
+  var typEl = document.getElementById('typing');
+  if (typEl) typEl.remove();
+  history.push({role:'assistant', content: aiReply});
+  appendMsg('ai', aiReply);
+  busy = false;
+  document.getElementById('sendBtn').disabled = false;
+}
+
+// ═══ EXPORT ═══
+function doExport() {
+  var spin = document.getElementById('exportSpin');
+  spin.style.display = 'block';
+  setTimeout(function(){
+    spin.style.display = 'none';
+    alert('✅ تم تصدير التقرير بنجاح!\n\nيحتوي على:\n• ملخص عام\n• إحصائيات الكليات\n• الأسئلة الأكثر شيوعاً\n• أداء الطلاب\n• الاستخدام اليومي');
+  }, 1800);
+}
+</script>
+</body>
+</html>
